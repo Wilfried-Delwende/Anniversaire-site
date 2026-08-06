@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Studio — Régie du site anniversaire</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;1,500&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="studio.css">
+</head>
+<body>
+
+  <!-- Écran de connexion -->
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <p class="eyebrow">Accès privé</p>
+      <h1>Studio</h1>
+      <p class="login-hint">Régie du site anniversaire — réservé à toi.</p>
+      <form id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email" autocomplete="username" required>
+        <input type="password" id="loginPassword" placeholder="Mot de passe" autocomplete="current-password" required>
+        <button type="submit" class="primary-btn">Se connecter</button>
+      </form>
+      <p id="loginError" class="login-error" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- Application principale -->
+  <div id="app" class="app hidden">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Studio</p>
+        <h1>Régie du site anniversaire</h1>
+      </div>
+      <button id="logoutBtn" class="ghost-btn" type="button">Déconnexion</button>
+    </header>
+
+    <nav class="room-tabs" id="roomTabs" aria-label="Choisir une salle"></nav>
+
+    <div class="storage-meter">
+      <div class="storage-bar"><div id="storageFill" class="storage-fill"></div></div>
+      <p id="storageLabel" class="storage-label">0 Mo utilisés sur 500 Mo</p>
+    </div>
+
+    <main class="block-list" id="blockList"></main>
+
+    <button id="addBlockBtn" class="fab" type="button">+ Ajouter à cette salle</button>
+  </div>
+
+  <!-- Formulaire d'ajout / édition -->
+  <div class="scrim" id="formScrim"></div>
+  <div class="sheet" id="formSheet" role="dialog" aria-modal="true" aria-labelledby="formTitle">
+    <button class="sheet-close" id="formClose" type="button" aria-label="Fermer">×</button>
+    <h2 id="formTitle">Nouveau bloc</h2>
+
+    <div class="type-picker" id="typePicker">
+      <button type="button" class="type-btn" data-type="texte"><span class="type-icon">✏️</span><span>Texte</span></button>
+      <button type="button" class="type-btn" data-type="photo"><span class="type-icon">🖼️</span><span>Photo</span></button>
+      <button type="button" class="type-btn" data-type="video"><span class="type-icon">🎬</span><span>Vidéo</span></button>
+      <button type="button" class="type-btn" data-type="audio"><span class="type-icon">🎵</span><span>Audio</span></button>
+    </div>
+
+    <form id="blockForm" class="hidden">
+      <label class="field-label">Étiquette (pour toi seulement)
+        <input type="text" id="fieldLabel" placeholder="Ex : Réplique de l'ours après l'explosion" required>
+      </label>
+
+      <label class="field-label hidden" id="fieldTextWrap">Contenu
+        <textarea id="fieldText" rows="5" placeholder="Écris ton texte ici…"></textarea>
+      </label>
+
+      <label class="field-label hidden" id="fieldFileWrap">Fichier
+        <input type="file" id="fieldFile">
+        <span class="field-hint hidden" id="fieldFileHint">Laisse vide pour garder le fichier actuel.</span>
+      </label>
+
+      <label class="field-label hidden" id="fieldLegendeWrap">Légende / message associé (optionnel)
+        <textarea id="fieldLegende" rows="3" placeholder="Ex : le message qui apparaît quand elle retourne la photo"></textarea>
+        <span class="field-hint">Sert pour un message lié à ce média : texte caché, note, légende…</span>
+      </label>
+
+      <div class="upload-progress hidden" id="uploadProgress">
+        <div class="upload-bar"><div id="uploadFill" class="upload-fill"></div></div>
+        <p id="uploadPct">0%</p>
+      </div>
+
+      <p id="formError" class="form-error" aria-live="polite"></p>
+
+      <button type="submit" id="submitBtn" class="primary-btn">Enregistrer</button>
+    </form>
+  </div>
+
+  <!-- Aperçu média -->
+  <div class="scrim" id="lightboxScrim"></div>
+  <div class="lightbox" id="lightbox">
+    <button class="sheet-close" id="lightboxClose" type="button" aria-label="Fermer l'aperçu">×</button>
+    <div id="lightboxContent"></div>
+  </div>
+
+  <script type="module" src="studio.js"></script>
+</body>
+      </html>
+    
