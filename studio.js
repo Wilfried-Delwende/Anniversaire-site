@@ -348,7 +348,6 @@ function showFieldsForType(type, isEdit) {
   fieldFileWrap.classList.toggle('hidden', type === 'texte');
   fieldLegendeWrap.classList.toggle('hidden', type === 'texte');
   fieldFileHint.classList.toggle('hidden', !isEdit);
-  fieldFile.required = !isEdit && type !== 'texte';
   if (type !== 'texte') {
     fieldFile.accept = type === 'photo' ? 'image/*' : type === 'video' ? 'video/*' : 'audio/*';
   }
@@ -366,11 +365,17 @@ function closeForm() {
 async function handleSubmit(e) {
   e.preventDefault();
   formError.textContent = '';
+
+  const etiquette = fieldLabel.value.trim();
+  if (!etiquette) {
+    formError.textContent = 'Remplis d\u2019abord l\u2019étiquette, en haut du formulaire.';
+    fieldLabel.focus();
+    return;
+  }
+
   submitBtn.disabled = true;
 
   try {
-    const etiquette = fieldLabel.value.trim();
-
     if (pickedType === 'texte') {
       const contenu = fieldText.value.trim();
       if (editingBlockId) {
@@ -443,7 +448,17 @@ function uploadToCloudinary(file, onProgress) {
         const data = JSON.parse(xhr.responseText);
         resolve({ url: data.secure_url, publicId: data.public_id, taille: data.bytes });
       } else {
-        reject(new Error('Envoi impossible (code ' + xhr.status + '). Vérifie le cloud name et le preset dans config.js.'));
+        let detail = '';
+        try {
+          const errData = JSON.parse(xhr.responseText);
+          if (errData && errData.error && errData.error.message) detail = errData.error.message;
+        } catch (parseErr) {
+          // Réponse non-JSON : on garde le message générique ci-dessous.
+        }
+        reject(new Error(
+          'Envoi impossible (code ' + xhr.status + ')' + (detail ? ' \u2014 ' + detail : '') +
+          '. Vérifie le cloud name et le preset dans config.js.'
+        ));
       }
     };
     xhr.onerror = () => reject(new Error('Erreur réseau pendant l\u2019envoi. Vérifie ta connexion.'));
@@ -478,4 +493,4 @@ function closeLightbox() {
 }
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 lightboxScrim.addEventListener('click', closeLightbox);
-  
+      
