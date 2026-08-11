@@ -9,5 +9,5 @@ export const firebaseConfig = {
 
 export const cloudinaryConfig = {
   cloudName: "adpmubt3",
-  uploadPreset: "anniversaire_media"
+  uploadPreset: "anniversaire_medias"
 };
