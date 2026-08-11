@@ -451,13 +451,17 @@ function uploadToCloudinary(file, onProgress) {
         let detail = '';
         try {
           const errData = JSON.parse(xhr.responseText);
-          if (errData && errData.error && errData.error.message) detail = errData.error.message;
+          if (errData && errData.error) {
+            detail = typeof errData.error === 'string' ? errData.error : (errData.error.message || '');
+          }
         } catch (parseErr) {
-          // Réponse non-JSON : on garde le message générique ci-dessous.
+          // Réponse non-JSON : on retombera sur le texte brut ci-dessous.
+        }
+        if (!detail && xhr.responseText) {
+          detail = xhr.responseText.slice(0, 200);
         }
         reject(new Error(
-          'Envoi impossible (code ' + xhr.status + ')' + (detail ? ' \u2014 ' + detail : '') +
-          '. Vérifie le cloud name et le preset dans config.js.'
+          'Envoi impossible (code ' + xhr.status + ')' + (detail ? ' \u2014 ' + detail : ' (pas de détail renvoyé)') + '.'
         ));
       }
     };
@@ -493,4 +497,4 @@ function closeLightbox() {
 }
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 lightboxScrim.addEventListener('click', closeLightbox);
-      
+                                              
