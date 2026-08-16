@@ -27,6 +27,7 @@ enableIndexedDbPersistence(db).catch(() => {
 });
 
 const ROOMS = [
+  { id: 0, name: 'Entrée & Couloir' },
   { id: 1, name: 'Le Mystère' },
   { id: 2, name: 'Melody' },
   { id: 3, name: 'Manga & Énigmes' },
@@ -38,7 +39,7 @@ const ROOMS = [
 const STORAGE_BUDGET_MO = 500;
 const TYPE_ICONS = { texte: '✏️', photo: '🖼️', video: '🎬', audio: '🎵' };
 
-let currentRoom = 1;
+let currentRoom = 0;
 let currentBlocks = [];
 let unsubscribeRoom = null;
 let unsubscribeAll = null;
@@ -63,6 +64,7 @@ const formError = document.getElementById('formError');
 const typePicker = document.getElementById('typePicker');
 const blockForm = document.getElementById('blockForm');
 
+const fieldSalle = document.getElementById('fieldSalle');
 const fieldLabel = document.getElementById('fieldLabel');
 const fieldText = document.getElementById('fieldText');
 const fieldFile = document.getElementById('fieldFile');
@@ -116,6 +118,7 @@ onAuthStateChanged(auth, (user) => {
 
 function initRoomTabs() {
   roomTabsEl.innerHTML = '';
+  fieldSalle.innerHTML = '';
   ROOMS.forEach((r) => {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -124,6 +127,11 @@ function initRoomTabs() {
     btn.textContent = r.id + '. ' + r.name;
     btn.addEventListener('click', () => selectRoom(r.id));
     roomTabsEl.appendChild(btn);
+
+    const opt = document.createElement('option');
+    opt.value = String(r.id);
+    opt.textContent = r.id + '. ' + r.name;
+    fieldSalle.appendChild(opt);
   });
 }
 
@@ -323,6 +331,7 @@ function openAddForm() {
   formTitle.textContent = 'Nouveau bloc \u2014 ' + roomName(currentRoom);
   formError.textContent = '';
   blockForm.reset();
+  fieldSalle.value = String(currentRoom);
   blockForm.classList.add('hidden');
   typePicker.classList.remove('hidden');
   openSheet();
@@ -336,6 +345,7 @@ function openEditForm(block) {
   typePicker.classList.add('hidden');
   blockForm.classList.remove('hidden');
   blockForm.reset();
+  fieldSalle.value = String(block.salle ?? currentRoom);
   fieldLabel.value = block.etiquette || '';
   fieldText.value = block.contenu || '';
   fieldLegende.value = block.legende || '';
@@ -372,6 +382,7 @@ async function handleSubmit(e) {
     fieldLabel.focus();
     return;
   }
+  const salleChoisie = Number(fieldSalle.value);
 
   submitBtn.disabled = true;
 
@@ -379,10 +390,10 @@ async function handleSubmit(e) {
     if (pickedType === 'texte') {
       const contenu = fieldText.value.trim();
       if (editingBlockId) {
-        await updateDoc(doc(db, 'blocs', editingBlockId), { etiquette, contenu });
+        await updateDoc(doc(db, 'blocs', editingBlockId), { salle: salleChoisie, etiquette, contenu });
       } else {
         await addDoc(collection(db, 'blocs'), {
-          salle: currentRoom, type: 'texte', etiquette, contenu,
+          salle: salleChoisie, type: 'texte', etiquette, contenu,
           ordre: nextOrder(), creeLe: serverTimestamp()
         });
       }
@@ -402,12 +413,12 @@ async function handleSubmit(e) {
       }
 
       if (editingBlockId) {
-        const updates = { etiquette, legende };
+        const updates = { salle: salleChoisie, etiquette, legende };
         if (mediaData) Object.assign(updates, mediaData);
         await updateDoc(doc(db, 'blocs', editingBlockId), updates);
       } else {
         await addDoc(collection(db, 'blocs'), {
-          salle: currentRoom, type: pickedType, etiquette, legende,
+          salle: salleChoisie, type: pickedType, etiquette, legende,
           ...mediaData, ordre: nextOrder(), creeLe: serverTimestamp()
         });
       }
@@ -497,4 +508,4 @@ function closeLightbox() {
 }
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 lightboxScrim.addEventListener('click', closeLightbox);
-                                              
+   
