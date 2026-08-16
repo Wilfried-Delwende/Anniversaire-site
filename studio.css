@@ -79,6 +79,7 @@ input[type="email"],
 input[type="password"],
 input[type="text"],
 input[type="file"],
+select,
 textarea {
   width: 100%;
   background: var(--surface-2);
@@ -89,8 +90,9 @@ textarea {
   font-family: var(--font-body);
   font-size: 0.95rem;
 }
+select { appearance: none; }
 input::placeholder, textarea::placeholder { color: var(--text-dim); }
-input:focus-visible, textarea:focus-visible, button:focus-visible {
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
@@ -416,5 +418,5 @@ input:focus-visible, textarea:focus-visible, button:focus-visible {
 
 @media (prefers-reduced-motion: reduce) {
   .sheet, .scrim, .lightbox, .storage-fill, .upload-fill { transition: none !important; }
-                         }
-  
+   }
+   
