@@ -428,7 +428,16 @@ async function handleSubmit(e) {
 
       if (file) {
         uploadProgress.classList.remove('hidden');
-        mediaData = await uploadToCloudinary(file, (pct) => {
+        let fileToSend = file;
+        if (pickedType === 'photo') {
+          uploadPct.textContent = 'Compression\u2026';
+          try {
+            fileToSend = await compressImage(file);
+          } catch (compressErr) {
+            fileToSend = file; // en cas de souci, on retente avec le fichier original
+          }
+        }
+        mediaData = await uploadToCloudinary(fileToSend, (pct) => {
           uploadFill.style.width = pct + '%';
           uploadPct.textContent = pct + '%';
         });
@@ -457,6 +466,52 @@ async function handleSubmit(e) {
 }
 
 /* ---------- Envoi vers Cloudinary ---------- */
+
+/* ---------- Compression des photos avant envoi ---------- */
+/* Les photos de smartphone dépassent souvent la limite de 10 Mo du plan
+   gratuit Cloudinary. On les redimensionne et recompresse ici, en local,
+   avant l'envoi \u2014 invisible pour l'utilisateur. */
+
+function compressImage(file, maxDimension = 2000, quality = 0.82) {
+  return new Promise((resolve) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDimension || height > maxDimension) {
+        if (width > height) {
+          height = Math.round(height * (maxDimension / width));
+          width = maxDimension;
+        } else {
+          width = Math.round(width * (maxDimension / height));
+          height = maxDimension;
+        }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob((blob) => {
+        URL.revokeObjectURL(objectUrl);
+        if (blob) {
+          const newName = file.name.replace(/\.\w+$/, '') + '.jpg';
+          resolve(new File([blob], newName, { type: 'image/jpeg' }));
+        } else {
+          resolve(file);
+        }
+      }, 'image/jpeg', quality);
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+
+    img.src = objectUrl;
+  });
+}
 
 function uploadToCloudinary(file, onProgress) {
   return new Promise((resolve, reject) => {
@@ -530,4 +585,4 @@ function closeLightbox() {
   lightboxContent.innerHTML = '';
 }
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-lightboxScrim.addEventListener('click', closeLightbox);
+lightboxScrim.addEventListener('click', closeLightbox
