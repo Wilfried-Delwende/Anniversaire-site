@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
 import {
   getFirestore, enableIndexedDbPersistence,
-  collection, addDoc, updateDoc, deleteDoc, doc,
+  collection, addDoc, updateDoc, deleteDoc, doc, writeBatch,
   onSnapshot, query, where, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
@@ -288,14 +288,28 @@ function iconButton(symbol, ariaLabel, disabled, onClick) {
   return btn;
 }
 
+let isMoving = false;
+
 async function moveBlock(index, direction) {
+  if (isMoving) return;
   const other = currentBlocks[index + direction];
   const current = currentBlocks[index];
   if (!other || !current) return;
-  const a = current.ordre ?? 0;
-  const b = other.ordre ?? 0;
-  await updateDoc(doc(db, 'blocs', current.id), { ordre: b });
-  await updateDoc(doc(db, 'blocs', other.id), { ordre: a });
+
+  isMoving = true;
+  document.querySelectorAll('.icon-btn').forEach((b) => { b.disabled = true; });
+
+  try {
+    const batch = writeBatch(db);
+    batch.update(doc(db, 'blocs', current.id), { ordre: other.ordre ?? 0 });
+    batch.update(doc(db, 'blocs', other.id), { ordre: current.ordre ?? 0 });
+    await batch.commit();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isMoving = false;
+    document.querySelectorAll('.icon-btn').forEach((b) => { b.disabled = false; });
+  }
 }
 
 async function confirmDelete(block) {
@@ -319,11 +333,19 @@ typePicker.querySelectorAll('.type-btn').forEach((btn) => {
     typePicker.classList.add('hidden');
     blockForm.classList.remove('hidden');
     blockForm.reset();
+    resetSubmitState();
     showFieldsForType(pickedType, false);
   });
 });
 
 blockForm.addEventListener('submit', handleSubmit);
+
+function resetSubmitState() {
+  submitBtn.disabled = false;
+  uploadProgress.classList.add('hidden');
+  uploadFill.style.width = '0%';
+  uploadPct.textContent = '0%';
+}
 
 function openAddForm() {
   editingBlockId = null;
@@ -331,6 +353,7 @@ function openAddForm() {
   formTitle.textContent = 'Nouveau bloc \u2014 ' + roomName(currentRoom);
   formError.textContent = '';
   blockForm.reset();
+  resetSubmitState();
   fieldSalle.value = String(currentRoom);
   blockForm.classList.add('hidden');
   typePicker.classList.remove('hidden');
@@ -345,6 +368,7 @@ function openEditForm(block) {
   typePicker.classList.add('hidden');
   blockForm.classList.remove('hidden');
   blockForm.reset();
+  resetSubmitState();
   fieldSalle.value = String(block.salle ?? currentRoom);
   fieldLabel.value = block.etiquette || '';
   fieldText.value = block.contenu || '';
@@ -428,10 +452,7 @@ async function handleSubmit(e) {
     console.error(err);
     formError.textContent = err.message || 'Une erreur est survenue. Réessaie.';
   } finally {
-    submitBtn.disabled = false;
-    uploadProgress.classList.add('hidden');
-    uploadFill.style.width = '0%';
-    uploadPct.textContent = '0%';
+    resetSubmitState();
   }
 }
 
@@ -447,6 +468,7 @@ function uploadToCloudinary(file, onProgress) {
 
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
+    xhr.timeout = 90000;
 
     xhr.upload.addEventListener('progress', (e) => {
       if (e.lengthComputable && onProgress) {
@@ -477,6 +499,7 @@ function uploadToCloudinary(file, onProgress) {
       }
     };
     xhr.onerror = () => reject(new Error('Erreur réseau pendant l\u2019envoi. Vérifie ta connexion.'));
+    xhr.ontimeout = () => reject(new Error('L\u2019envoi a pris trop de temps (90 secondes). Réessaie.'));
     xhr.send(formData);
   });
 }
@@ -508,4 +531,3 @@ function closeLightbox() {
 }
 document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 lightboxScrim.addEventListener('click', closeLightbox);
-   
