@@ -1,0 +1,144 @@
+/* ============================================
+   BEAR.CSS
+   Apparence, poses et expressions de l'ours.
+   Chaque "pose" positionne les groupes (corps, bras,
+   tête) via des transforms CSS. Chaque "expression"
+   bascule quelle variante de bouche/yeux est visible.
+   ============================================ */
+
+.bear-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 112px;
+  height: 134px;
+  transform-origin: center bottom;
+}
+
+.bear {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* ---------- Couleurs de base ---------- */
+.bear__shadow ellipse { fill: rgba(0, 0, 0, 0.25); }
+.bear__body ellipse:first-child { fill: #9c6b3f; }
+.bear__belly { fill: #e8c9a0; }
+.bear__leg ellipse { fill: #9c6b3f; }
+.bear__arm ellipse { fill: #9c6b3f; }
+.bear__patte { fill: #e8c9a0; }
+.bear__ear { fill: #9c6b3f; }
+.bear__ear-inner { fill: #e8c9a0; }
+.bear__face { fill: #a9764a; }
+.bear__snout { fill: #e8c9a0; }
+.bear__nose { fill: #3a2418; }
+.bear__eye-white { fill: #fdf8f0; }
+.bear__eye-pupil { fill: #2a1c12; transition: transform 0.2s ease; }
+.bear__blush { fill: var(--rose); opacity: 0; transition: opacity 0.3s ease; }
+.bear__mouth { stroke: #3a2418; stroke-width: 3.5; opacity: 0; transition: opacity 0.15s ease; }
+.bear__mouth--mort-de-rire { fill: #6b3a24; }
+.bear__tear { opacity: 0; transition: opacity 0.3s ease; }
+.bear__tear path { fill: #a7d8f0; }
+
+/* ---------- Silhouette (avant l'explosion, salle 1) ---------- */
+.bear--silhouette .bear__body ellipse,
+.bear--silhouette .bear__belly,
+.bear--silhouette .bear__leg ellipse,
+.bear--silhouette .bear__arm ellipse,
+.bear--silhouette .bear__patte,
+.bear--silhouette .bear__ear,
+.bear--silhouette .bear__ear-inner,
+.bear--silhouette .bear__face,
+.bear--silhouette .bear__snout,
+.bear--silhouette .bear__nose {
+  fill: #030204;
+}
+.bear--silhouette .bear__eye-white,
+.bear--silhouette .bear__eye-pupil,
+.bear--silhouette .bear__mouth,
+.bear--silhouette .bear__blush,
+.bear--silhouette .bear__shadow {
+  opacity: 0;
+}
+
+/* ---------- Bras : point d'origine à l'épaule ---------- */
+.bear__arm--left { transform: translate(49px, 148px) rotate(6deg); transform-origin: 0 -26px; }
+.bear__arm--right { transform: translate(151px, 148px) rotate(-6deg); transform-origin: 0 -26px; }
+
+/* ---------- Expressions : on affiche la bonne bouche ---------- */
+.bear--expr-neutre .bear__mouth--neutre { opacity: 1; }
+
+.bear--expr-content .bear__mouth--content { opacity: 1; }
+.bear--expr-content .bear__blush { opacity: 1; }
+
+.bear--expr-surpris .bear__mouth--surpris { opacity: 1; }
+.bear--expr-surpris .bear__eye-pupil { transform: scale(1.3); }
+
+.bear--expr-triste .bear__mouth--triste { opacity: 1; }
+.bear--expr-triste .bear__tear { opacity: 1; }
+
+.bear--expr-mort-de-rire .bear__mouth--mort-de-rire { opacity: 1; }
+.bear--expr-mort-de-rire .bear__blush { opacity: 1; }
+
+/* ============================================
+   POSES
+   ============================================ */
+
+/* Assis / pose par défaut, arms au repos, contre le corps */
+.bear--pose-assis .bear__arm--left { transform: translate(48px, 150px) rotate(10deg); }
+.bear--pose-assis .bear__arm--right { transform: translate(152px, 150px) rotate(-10deg); }
+
+/* Vole vers le haut : bras tendus vers le haut, légère inclinaison */
+.bear--pose-vole {
+  transform: rotate(-8deg);
+}
+.bear--pose-vole .bear__arm--left { transform: translate(56px, 128px) rotate(-100deg); }
+.bear--pose-vole .bear__arm--right { transform: translate(144px, 128px) rotate(100deg); }
+.bear--pose-vole .bear__leg--left ellipse,
+.bear--pose-vole .bear__leg--right ellipse {
+  transform: translateY(-6px);
+}
+
+/* Chute libre : bras écartés vers le haut, tête légèrement penchée en arrière */
+.bear--pose-chute {
+  transform: rotate(6deg);
+}
+.bear--pose-chute .bear__arm--left { transform: translate(50px, 132px) rotate(-75deg); }
+.bear--pose-chute .bear__arm--right { transform: translate(150px, 132px) rotate(75deg); }
+
+/* Accroché à un ballon : un bras tendu vers le haut, l'autre au repos */
+.bear--pose-ballon .bear__arm--left { transform: translate(60px, 120px) rotate(-115deg); }
+.bear--pose-ballon .bear__arm--right { transform: translate(152px, 150px) rotate(-8deg); }
+
+/* Assis sur une branche : jambes pendantes, détendu */
+.bear--pose-branche .bear__leg--left ellipse { transform: translate(4px, 10px) rotate(20deg); }
+.bear--pose-branche .bear__leg--right ellipse { transform: translate(-4px, 10px) rotate(-20deg); }
+.bear--pose-branche .bear__arm--left { transform: translate(51px, 152px) rotate(24deg); }
+.bear--pose-branche .bear__arm--right { transform: translate(149px, 152px) rotate(-24deg); }
+
+/* Debout, content : légère respiration via l'animation ci-dessous */
+.bear--pose-debout .bear__arm--left { transform: translate(49px, 151px) rotate(8deg); }
+.bear--pose-debout .bear__arm--right { transform: translate(151px, 151px) rotate(-8deg); }
+
+/* Respiration douce, appliquée en continu sur toutes les poses statiques */
+@keyframes bear-breathe {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+.bear--pose-assis .bear__body,
+.bear--pose-debout .bear__body,
+.bear--pose-branche .bear__body {
+  animation: bear-breathe 3.2s ease-in-out infinite;
+}
+
+/* ---------- Silhouette du bras seul (scène de la veilleuse) ---------- */
+.bear-arm-silhouette-wrapper {
+  position: absolute;
+  width: 160px;
+  height: 200px;
+  pointer-events: none;
+}
+.bear-arm-silhouette { width: 100%; height: 100%; overflow: visible; }
+.bear-arm-silhouette__group { fill: #030204; }
+.bear-arm-silhouette__paw { fill: #030204; }
