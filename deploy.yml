@@ -1,0 +1,52 @@
+name: Compiler et publier le site
+
+# Se déclenche automatiquement à chaque envoi sur la branche principale.
+# ⚠️ Si le nom de ta branche n'est pas "main" (regarde en haut de la page
+# de ton dépôt, à côté de l'icône de branche), remplace-le ci-dessous.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code du dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installer les dépendances (React, Vite, etc.)
+        run: npm install
+
+      - name: Construire le site (compile React en HTML/CSS/JS classique)
+        run: npm run build
+
+      - name: Préparer le résultat pour la publication
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publier sur GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
