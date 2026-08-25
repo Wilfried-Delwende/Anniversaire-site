@@ -1,5 +1,15 @@
 import React from 'react'
+import './App.css'
 
-export default function App() {
-  return <div style={{ color: 'white', textAlign: 'center', marginTop: '50px' }}><h1>Site en préparation... 🎉</h1></div>
+function App() {
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>🎉 Anniversaire Site 🎉</h1>
+        <p>Bienvenue sur mon site d'anniversaire!</p>
+      </header>
+    </div>
+  )
 }
+
+export default App
